@@ -3,13 +3,50 @@ name = "file-editor"
 version = "0.1.0"
 description = "Memory-efficient partial file editing library for Python with agent-friendly API"
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
+    { name = "rwxproject", email = "rwxproject@gmail.com" }
+]
+maintainers = [
     { name = "rwxproject", email = "rwxproject@gmail.com" }
 ]
 requires-python = ">=3.11"
 dependencies = [
     "filelock>=3.12.0",
 ]
+keywords = [
+    "file-editing",
+    "memory-efficient", 
+    "partial-editing",
+    "agents",
+    "ai",
+    "streaming",
+    "mmap",
+    "csv",
+    "markdown"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Filesystems",
+    "Topic :: Text Processing",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/rwxproject/file-editor"
+Documentation = "https://github.com/rwxproject/file-editor#readme"
+Repository = "https://github.com/rwxproject/file-editor.git"
+"Bug Tracker" = "https://github.com/rwxproject/file-editor/issues"
+Changelog = "https://github.com/rwxproject/file-editor/releases"
 
 [project.optional-dependencies]
 pandas = ["pandas>=2.0.0"]
@@ -23,6 +60,7 @@ dev-dependencies = [
     "black>=23.0.0",
     "ruff>=0.1.0",
     "pytest-benchmark>=4.0.0",
+    "twine>=6.1.0",
 ]
 
 [build-system]
