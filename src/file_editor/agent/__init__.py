@@ -3,6 +3,6 @@
 from .interface import AgentFileSystem, SpecializedAgentEditors
 
 __all__ = [
-    'AgentFileSystem',
-    'SpecializedAgentEditors',
+    "AgentFileSystem",
+    "SpecializedAgentEditors",
 ]

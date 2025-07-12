@@ -80,7 +80,7 @@ dependencies = [
 ]
 keywords = [
     "keyword1",
-    "keyword2", 
+    "keyword2",
     "relevant-tags"
 ]
 classifiers = [
@@ -496,27 +496,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install uv
       uses: astral-sh/setup-uv@v2
-    
+
     - name: Install dependencies
       run: uv sync --all-extras
-    
+
     - name: Run tests
       run: uv run pytest
-    
+
     - name: Build package
       run: uv build
-    
+
     - name: Check distribution
       run: uv run twine check dist/*
-    
+
     - name: Publish to PyPI
       env:
         TWINE_USERNAME: __token__

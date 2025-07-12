@@ -99,11 +99,11 @@ with MmapEditor("data.bin", mode="r+b") as editor:
     # Direct byte-level access
     data = editor.read_slice(offset, length)
     editor.write_slice(offset, new_data)
-    
+
     # Pattern operations
     positions = editor.find_all(b"search_pattern")
     editor.replace_all(b"old", b"new")  # Same length only
-    
+
     # File operations
     editor.resize(new_size)
     editor.flush()

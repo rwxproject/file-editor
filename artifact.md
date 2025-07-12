@@ -17,7 +17,7 @@ with open('large_file.dat', 'r+b') as f:
         # Direct byte-level access without loading entire file
         data_slice = mm[1000000:1001000]  # Read 1KB from 1MB offset
         mm[500:600] = b'modified_content'  # Write 100 bytes at offset 500
-        
+
         # Find patterns efficiently
         position = mm.find(b'search_pattern')
         if position != -1:
@@ -81,22 +81,22 @@ class MarkdownSectionEditor:
     def __init__(self, file_path):
         self.file_path = file_path
         self.heading_pattern = re.compile(r'^(#{1,6})\s+(.+)$')
-    
+
     def edit_section_streaming(self, target_header, new_content):
         """Edit markdown section with minimal memory usage"""
         temp_file = self.file_path + '.tmp'
-        
+
         with open(self.file_path, 'r') as infile, open(temp_file, 'w') as outfile:
             in_target_section = False
             current_level = 0
-            
+
             for line in infile:
                 heading_match = self.heading_pattern.match(line.strip())
-                
+
                 if heading_match:
                     level = len(heading_match.group(1))
                     title = heading_match.group(2)
-                    
+
                     if title == target_header:
                         in_target_section = True
                         current_level = level
@@ -105,10 +105,10 @@ class MarkdownSectionEditor:
                         continue
                     elif in_target_section and level <= current_level:
                         in_target_section = False
-                
+
                 if not in_target_section:
                     outfile.write(line)
-        
+
         import shutil
         shutil.move(temp_file, self.file_path)
 ```
@@ -122,21 +122,21 @@ import csv
 def edit_csv_conditionally(file_path, chunk_size=10000):
     """Process large CSV with complex conditions"""
     temp_file = file_path + '.tmp'
-    
+
     # First chunk determines structure
     first_chunk = pd.read_csv(file_path, nrows=1)
     columns = first_chunk.columns
-    
+
     with open(temp_file, 'w') as f:
         # Process in chunks with transformations
         for chunk in pd.read_csv(file_path, chunksize=chunk_size):
             # Apply complex transformations
             chunk.loc[chunk['status'] == 'pending', 'status'] = 'processed'
             chunk.loc[chunk['value'] > 1000, 'category'] = 'high'
-            
+
             # Write processed chunk
             chunk.to_csv(f, mode='a', header=f.tell() == 0, index=False)
-    
+
     import shutil
     shutil.move(temp_file, file_path)
 
@@ -147,7 +147,7 @@ def stream_csv_edits(input_path, output_path, row_transformer):
             reader = csv.DictReader(infile)
             writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
             writer.writeheader()
-            
+
             for row in reader:
                 transformed_row = row_transformer(row)
                 if transformed_row:  # Allow filtering
@@ -162,14 +162,14 @@ import fileinput
 class SmartTextEditor:
     def __init__(self, context_lines=2):
         self.context_lines = context_lines
-    
+
     def edit_with_context(self, file_path, condition_func, transform_func):
         """Edit lines with surrounding context awareness"""
         from collections import deque
-        
+
         context_buffer = deque(maxlen=self.context_lines)
         pending_lines = []
-        
+
         with open(file_path, 'r') as f:
             for line_num, line in enumerate(f, 1):
                 if condition_func(line, context_buffer):
@@ -181,9 +181,9 @@ class SmartTextEditor:
                     yield from pending_lines
                     pending_lines = []
                     yield line
-                
+
                 context_buffer.append(line)
-            
+
             # Flush remaining
             yield from pending_lines
 ```
@@ -202,25 +202,25 @@ def production_safe_edit(file_path, edit_function, timeout=30):
     """Production-grade file editing with all safety measures"""
     lock = FileLock(f"{file_path}.lock", timeout=timeout)
     backup_path = f"{file_path}.backup"
-    
+
     try:
         with lock:
             # Create backup atomically
             shutil.copy2(file_path, backup_path)
-            
+
             # Perform edit on temporary file
-            with tempfile.NamedTemporaryFile(mode='w', dir=os.path.dirname(file_path), 
+            with tempfile.NamedTemporaryFile(mode='w', dir=os.path.dirname(file_path),
                                            delete=False) as tmp:
                 with open(file_path, 'r') as original:
                     edit_function(original, tmp)
                 temp_name = tmp.name
-            
+
             # Atomic replace
             os.replace(temp_name, file_path)
-            
+
             # Success - remove backup
             os.remove(backup_path)
-            
+
     except Exception as e:
         # Restore from backup on any failure
         if os.path.exists(backup_path):
@@ -244,18 +244,18 @@ import json
 
 class AgentFileSystem:
     """File system abstraction for AI agents"""
-    
+
     def __init__(self, workspace_dir: str, chunk_size: int = 4096):
         self.workspace = workspace_dir
         self.chunk_size = chunk_size
         self.operation_log = []
-    
-    def read_file_section(self, file_path: str, start_line: int, 
+
+    def read_file_section(self, file_path: str, start_line: int,
                          end_line: int) -> str:
         """Read specific section with automatic safety measures"""
         full_path = os.path.join(self.workspace, file_path)
         lock = FileLock(f"{full_path}.lock", timeout=5)
-        
+
         with lock:
             lines = []
             with open(full_path, 'r') as f:
@@ -264,15 +264,15 @@ class AgentFileSystem:
                         lines.append(line)
                     elif i > end_line:
                         break
-            
+
             self._log_operation('read', file_path, (start_line, end_line))
             return ''.join(lines)
-    
-    def modify_file_section(self, file_path: str, start_line: int, 
+
+    def modify_file_section(self, file_path: str, start_line: int,
                           end_line: int, new_content: str) -> bool:
         """Safely modify file section with automatic rollback"""
         full_path = os.path.join(self.workspace, file_path)
-        
+
         def edit_function(original, output):
             for i, line in enumerate(original, 1):
                 if i < start_line or i > end_line:
@@ -281,16 +281,16 @@ class AgentFileSystem:
                     output.write(new_content)
                     if not new_content.endswith('\n'):
                         output.write('\n')
-        
+
         try:
             production_safe_edit(full_path, edit_function)
-            self._log_operation('modify', file_path, 
+            self._log_operation('modify', file_path,
                               (start_line, end_line, len(new_content)))
             return True
         except Exception as e:
             self._log_operation('failed_modify', file_path, str(e))
             return False
-    
+
     def _log_operation(self, op_type: str, file_path: str, details):
         """Maintain audit trail for agent operations"""
         self.operation_log.append({
@@ -328,39 +328,39 @@ import logging
 
 class ProductionFileEditor:
     """Enterprise-grade partial file editing system"""
-    
-    def __init__(self, default_timeout: int = 30, 
+
+    def __init__(self, default_timeout: int = 30,
                  default_chunk_size: int = 256 * 1024):
         self.timeout = default_timeout
         self.chunk_size = default_chunk_size
         self.logger = logging.getLogger(__name__)
-    
+
     @contextmanager
     def safe_edit_context(self, file_path: Path):
         """Context manager ensuring safe file modifications"""
         lock_path = f"{file_path}.lock"
         backup_path = f"{file_path}.backup"
         lock = FileLock(lock_path, timeout=self.timeout)
-        
+
         try:
             with lock:
                 # Create backup
                 shutil.copy2(file_path, backup_path)
                 self.logger.info(f"Created backup: {backup_path}")
-                
+
                 yield file_path
-                
+
                 # Success - remove backup
                 os.remove(backup_path)
                 self.logger.info(f"Edit successful, removed backup")
-                
+
         except Exception as e:
             # Restore on failure
             self.logger.error(f"Edit failed: {e}, restoring backup")
             if os.path.exists(backup_path):
                 shutil.move(backup_path, file_path)
             raise
-    
+
     def mmap_edit(self, file_path: Path, edit_func: Callable):
         """Memory-mapped editing for large files"""
         with self.safe_edit_context(file_path):
@@ -368,13 +368,13 @@ class ProductionFileEditor:
                 with mmap.mmap(f.fileno(), 0) as mm:
                     edit_func(mm)
                     mm.flush()
-    
-    def streaming_edit(self, file_path: Path, 
+
+    def streaming_edit(self, file_path: Path,
                       process_func: Callable[[bytes], bytes]):
         """Stream-based editing for sequential processing"""
         with self.safe_edit_context(file_path):
             temp_path = file_path.with_suffix('.tmp')
-            
+
             with open(file_path, 'rb') as infile:
                 with open(temp_path, 'wb') as outfile:
                     while True:
@@ -383,35 +383,35 @@ class ProductionFileEditor:
                             break
                         processed = process_func(chunk)
                         outfile.write(processed)
-            
+
             os.replace(temp_path, file_path)
-    
-    def partial_replace(self, file_path: Path, 
-                       start_offset: int, end_offset: int, 
+
+    def partial_replace(self, file_path: Path,
+                       start_offset: int, end_offset: int,
                        new_content: bytes):
         """Replace specific byte range efficiently"""
         file_size = file_path.stat().st_size
-        
+
         if end_offset > file_size:
             raise ValueError(f"End offset {end_offset} exceeds file size {file_size}")
-        
+
         def replace_bytes(mm):
             # Read parts to preserve
             before = mm[:start_offset]
             after = mm[end_offset:]
-            
+
             # Calculate new size
             new_size = len(before) + len(new_content) + len(after)
-            
+
             # Resize if needed
             if new_size != len(mm):
                 mm.resize(new_size)
-            
+
             # Write new content
             mm[:start_offset] = before
             mm[start_offset:start_offset + len(new_content)] = new_content
             mm[start_offset + len(new_content):] = after
-        
+
         self.mmap_edit(file_path, replace_bytes)
 ```
 
