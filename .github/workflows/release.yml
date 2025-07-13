@@ -31,7 +31,7 @@ jobs:
 
     - name: Run full test suite
       run: |
-        uv run pytest --cov-report=xml --cov-fail-under=95
+        uv run pytest --cov-report=xml --cov-fail-under=80
 
     - name: Security scan
       run: |

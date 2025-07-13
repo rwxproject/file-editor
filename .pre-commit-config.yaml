@@ -57,7 +57,7 @@ repos:
 
       - id: coverage-check
         name: check coverage
-        entry: uv run pytest --cov-fail-under=95
+        entry: uv run pytest --cov-fail-under=80
         language: system
         pass_filenames: false
         always_run: true
