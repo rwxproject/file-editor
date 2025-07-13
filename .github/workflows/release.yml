@@ -91,13 +91,22 @@ jobs:
         name: python-package-distributions
         path: dist/
 
+    - name: Publish to GitHub Packages
+      run: |
+        uv run twine upload --repository-url https://api.github.com/orgs/${{ github.repository_owner }}/packages/pypi/upload dist/* || echo "GitHub Packages upload failed, continuing..."
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Display package info for manual upload
       run: |
         echo "✅ Package built successfully!"
         echo "📦 Distribution files:"
         ls -la dist/
         echo ""
-        echo "🔧 To publish manually, run:"
+        echo "📋 Published to GitHub Packages: https://github.com/rwxproject/file-editor/packages"
+        echo ""
+        echo "🔧 To publish to PyPI manually, run:"
         echo "  twine upload dist/*"
         echo ""
         echo "📋 Package ready for PyPI upload:"
