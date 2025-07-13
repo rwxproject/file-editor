@@ -45,7 +45,9 @@ class TestAgentFileSystem:
         # Read lines 2-4
         section = self.agent_fs.read_file_section("test.txt", 2, 4)
         expected = "Line 2\nLine 3\nLine 4"
-        assert section == expected
+        # Normalize line endings for cross-platform compatibility
+        section_normalized = section.replace('\r\n', '\n').rstrip('\r')
+        assert section_normalized == expected
 
     def test_modify_file_section(self):
         """Test modifying file sections."""
