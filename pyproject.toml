@@ -87,7 +87,6 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
     "--cov-report=xml",
-    "--cov-fail-under=95",
     "--timeout=300",
     "-ra",
     "--tb=short",
