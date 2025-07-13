@@ -86,7 +86,7 @@ jobs:
         python -c "import file_editor; print('Package installed successfully')"
 
     - name: Upload distribution packages
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
         path: dist/
@@ -114,12 +114,10 @@ jobs:
         echo "  - Files: $(ls dist/)"
 
     - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ steps.version.outputs.version }}
+        tag_name: v${{ steps.version.outputs.version }}
+        name: Release ${{ steps.version.outputs.version }}
         body: |
           ## Changes in this Release
 
@@ -131,12 +129,17 @@ jobs:
 
           ### Installation
 
+          Install from GitHub Packages:
+          ```bash
+          pip install --index-url https://api.github.com/orgs/rwxproject/packages/pypi/simple/ file-editor==${{ steps.version.outputs.version }}
+          ```
+
+          Or from PyPI (manual upload):
           ```bash
           pip install file-editor==${{ steps.version.outputs.version }}
           ```
 
           Or with uv:
-
           ```bash
           uv add file-editor==${{ steps.version.outputs.version }}
           ```
@@ -146,6 +149,7 @@ jobs:
           **Full Changelog**: https://github.com/rwxproject/file-editor/compare/v${{ steps.version.outputs.version }}...HEAD
         draft: false
         prerelease: false
+        files: dist/*
 
 
   notify:
