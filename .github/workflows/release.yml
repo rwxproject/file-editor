@@ -85,21 +85,24 @@ jobs:
         python -m pip install dist/*.whl
         python -c "import file_editor; print('Package installed successfully')"
 
-    - name: Publish to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Upload distribution packages
+      uses: actions/upload-artifact@v3
       with:
-        repository-url: https://test.pypi.org/legacy/
-        skip-existing: true
+        name: python-package-distributions
+        path: dist/
 
-    - name: Test installation from TestPyPI
+    - name: Display package info for manual upload
       run: |
-        python -m pip uninstall -y file-editor
-        sleep 10  # Wait for package to be available
-        python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ file-editor==${{ steps.version.outputs.version }}
-        python -c "import file_editor; print('TestPyPI installation successful')"
-
-    - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+        echo "✅ Package built successfully!"
+        echo "📦 Distribution files:"
+        ls -la dist/
+        echo ""
+        echo "🔧 To publish manually, run:"
+        echo "  twine upload dist/*"
+        echo ""
+        echo "📋 Package ready for PyPI upload:"
+        echo "  - Version: ${{ steps.version.outputs.version }}"
+        echo "  - Files: $(ls dist/)"
 
     - name: Create GitHub Release
       uses: actions/create-release@v1
@@ -135,18 +138,9 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload release assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/
-        asset_name: file-editor-${{ steps.version.outputs.version }}-dist.zip
-        asset_content_type: application/zip
 
   notify:
-    name: Post-release notifications
+    name: Release completion
     runs-on: ubuntu-latest
     needs: build
     if: success()
@@ -158,13 +152,9 @@ jobs:
         VERSION=${GITHUB_REF#refs/tags/v}
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-    - name: Verify PyPI publication
+    - name: Release summary
       run: |
-        sleep 60  # Wait for PyPI to update
-        pip index versions file-editor | grep "${{ steps.version.outputs.version }}" || exit 1
-
-    - name: Create success notification
-      run: |
-        echo "✅ file-editor v${{ steps.version.outputs.version }} successfully released!"
-        echo "📦 Available on PyPI: https://pypi.org/project/file-editor/${{ steps.version.outputs.version }}/"
+        echo "✅ file-editor v${{ steps.version.outputs.version }} release completed!"
+        echo "📦 Distribution packages built and uploaded as artifacts"
         echo "📋 GitHub Release: https://github.com/rwxproject/file-editor/releases/tag/v${{ steps.version.outputs.version }}"
+        echo "🔧 Download artifacts and run 'twine upload dist/*' to publish to PyPI"
