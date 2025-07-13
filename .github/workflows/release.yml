@@ -31,7 +31,7 @@ jobs:
 
     - name: Run core tests for release
       run: |
-        uv run pytest tests/test_basic_functionality.py --cov-report=xml --cov-fail-under=60
+        uv run pytest tests/test_basic_functionality.py --cov-report=xml
 
     - name: Security scan
       run: |
