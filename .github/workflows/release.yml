@@ -44,6 +44,8 @@ jobs:
     needs: test
     environment: release
     permissions:
+      contents: write  # For creating releases
+      packages: write  # For GitHub Packages
       id-token: write  # For trusted publishing to PyPI
 
     steps:
